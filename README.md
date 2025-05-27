@@ -12,7 +12,18 @@ A Caddy v2 DNS provider plugin that enables ACME DNS-01 challenge validation thr
 
 ## Installation
 
-### Method 1: Build with xcaddy
+### Method 1: Official Plugin Installation (Recommended)
+
+Caddy now supports dynamic plugin installation. Simply run:
+```bash
+caddy add-package github.com/xcaddyplugins/caddy-dns-godaddy
+```
+
+This command will automatically download, compile, and replace the current Caddy binary with a version that includes the GoDaddy DNS plugin.
+
+### Method 2: Build with xcaddy (Alternative)
+
+If you prefer to build manually or need custom build options:
 
 First, install xcaddy:
 ```bash
@@ -24,7 +35,7 @@ Then build Caddy with the GoDaddy DNS plugin:
 xcaddy build --with github.com/xcaddyplugins/caddy-dns-godaddy
 ```
 
-### Method 2: Docker Build
+### Method 3: Docker Build
 
 Create a Dockerfile:
 ```dockerfile
