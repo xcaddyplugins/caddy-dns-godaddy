@@ -190,6 +190,11 @@ func (p *Provider) SetRecords(ctx context.Context, zone string, records []libdns
 	return p.AppendRecords(ctx, zone, records)
 }
 
+const (
+	godaddyMinTTL = 600    // 10 minutes (standard minimum)
+	godaddyMaxTTL = 604800 // 7 days
+)
+
 // createRecord creates a single DNS record
 func (p *Provider) createRecord(ctx context.Context, zone string, record libdns.Record) error {
 	domain := strings.TrimSuffix(zone, ".")
@@ -198,6 +203,21 @@ func (p *Provider) createRecord(ctx context.Context, zone string, record libdns.
 		recordName = "@"
 	}
 	rr := record.RR()
+
+	//If the time is NOT zero then validate it is within the valid range
+	// Validation here is good, because of the lets encrypt rate limit. It is very easy to accidently hit a rate limit when GoDaddy is having this issue.
+	if rr.TTL != 0 {
+		//If zero handle the seconds converison
+		rr.TTL /= time.Second
+		//If below minimum give a clear error
+		if rr.TTL < godaddyMinTTL {
+			return fmt.Errorf("TTL of %d seconds is below GoDaddy's minimum of %d seconds (use 0 for default auto-handling)", rr.TTL, godaddyMinTTL)
+			//If above maximum give a clear error
+		} else if rr.TTL > godaddyMaxTTL {
+			return fmt.Errorf("TTL of %d seconds exceeds GoDaddy's maximum of %d seconds", rr.TTL, godaddyMaxTTL)
+		}
+	}
+
 	godaddyRecord := libdns.RR{
 		Type: rr.Type,
 		Name: recordName,
